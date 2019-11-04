@@ -2,9 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Test</title>
+
+  <link rel = "stylesheet"
+    type = "text/css"
+    href = "option.css" />
+
+  <title>Chrome-Atic</title>
+  <link rel="stylesheet" href="https://use.typekit.net/mzg0jom.css">
 </head>
 <body>
-  Test. Why. awoiefhoajhefoaiwhef
+    <div class="Header">
+   
+    <h1>CHROMATIC </h1>
+    </div>
+    <p>STEP 1: Choose a Preset</p>
+<div class = "radios">
+    <input type="radio" name="test" value="NORMAL"> Normal<br>
+    <input type="radio" name="test" value="PROTANOPIA"> Protanopia<br>
+    <input type="radio" name="test" value="PROTANOMALY"> Protanomaly<br>
+    <input type="radio" name="test" value="DEUTERANOPIA"> Deuteranopia<br>
+    <input type="radio" name="test" value="DEUTERANOMALY"> Deuteranomaly<br>
+    <input type="radio" name="test" value="TRITANOPIA"> Tritanopia<br>
+    <input type="radio" name="test" value="TRITANOMALY"> Tritanomaly<br>
+    <input type="radio" name="test" value="ACHROMATOPSIA"> Achromatopsia<br>
+    <input type="radio" name="test" value="ACHROMATOLAMY"> Achromatolamy<br>
+    <input type="radio" name="test" value="LOW-CONTRAST"> Low-Contrast
+   
+
+  </div>
+
+    <!-- Display -->
+  
+
+  <div class="slider">
+  
+     <!--  <a href="#slide-1">1</a>
+      <a href="#slide-2">2</a>
+      <a href="#slide-3">3</a>
+      <a href="#slide-4">4</a>
+      <a href="#slide-5">5</a>
+      <a href="#slide-5">6</a>
+      <a href="#slide-5">7</a>
+      <a href="#slide-5">8</a>
+      <a href="#slide-5">9</a>
+      <a href="#slide-5">10</a>
+      -->
+    
+      <div class="slides">
+        <div id="slide-1">
+          Normal
+        </div>
+        <div id="slide-2">
+          Protanopia
+        </div>
+        <div id="slide-3">
+          Protanomaly
+        </div>
+        <div id="slide-4">
+          Deuteranopia
+        </div>
+        <div id="slide-5">
+          Deuteranomaly
+        </div>
+        <div id="slide-6">
+            Tritanopia
+          </div>
+          <div id="slide-7">
+              Tritanomaly
+            </div>
+            <div id="slide-8">
+                Achromatopsia
+              </div>
+              <div id="slide-9">
+                  Achromatolamy
+                </div>
+                <div id="slide-10">
+                    Low-Contrast
+                  </div>
+      </div>
+    </div>
+
+    <p>Step 2: Adjust the SliderXX</p>
+
+     <!-- Slider Code -->
+
+     <html lang="en-US">
+
+        <div class="slider">
+        <input type = "range" min="0" max="100" onchange="rangevalue.value=value"/>
+        <output id="rangevalue">50</output>
+        </div>
+
+<button id="apply-color-change" class="apply">Apply</button>
+<button class="cancel">Cancel</button>
+
 </body>
 </html>

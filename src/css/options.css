@@ -1,0 +1,92 @@
+@charset "UTF-8";
+
+
+/* CSS Document */
+
+
+  <!-- Scroll Images -->
+
+ {
+  box-sizing: border-box;
+}
+
+
+.slider {
+  width: 170px;
+  text-align: center;
+}
+
+.slides {
+  display: flex;
+  
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+
+}
+
+.slides > div {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  margin-top: 10px;
+  margin-right: 10px;
+  border-radius: 10px;
+  background:lightgray;
+  transform-origin: center center;
+  transform: scale(1);
+  transition: transform 0.5s;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+}
+
+body {
+
+    background:  rgb(34, 39, 44);
+    font-family: sans-serif;
+
+    font-family: canada-type-gibson, sans-serif;
+
+    font-weight: 300;
+    
+  
+    margin: 10px;
+
+
+    color: white;
+    align-self: baseline;
+
+
+    font-style: normal;
+font-size: 10px;
+letter-spacing: 2px;
+     
+  }
+
+  h1 {  
+
+margin-top: 20px;
+
+color: white;
+  }
+  p {
+    color: white;
+    margin-left: 1px;
+  }
+ 
+  slider {
+display: inline;
+margin-left: 2px;
+
+ }
+
+ button{
+    border-radius: 5px;
+    background-color: rgb(34, 39, 44); 
+    color: white;
+    margin-left: 13px;
+    margin-top: 15px;
+}

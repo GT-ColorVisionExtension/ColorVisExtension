@@ -3,7 +3,7 @@ const svgImage = chrome.extension.getURL(require('./../img/testfilter.svg'));
 const svgContent = `
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
   <defs>
-    <filter x="0" y="0" width="99999" height="99999" id="cvd_extension_0">
+    <filter x="0" y="0" width="99999" height="99999" id="cvd">
       <feGaussianBlur stdDeviation="8"/>
     </filter>
   </defs>
@@ -68,7 +68,7 @@ ccInner.style.top = `${ccSettings.y}px`;
 ccInner.style.zIndex = "99999999";
 // ccInner.style['backdrop-filter'] = `url("${svgImage}#myFilter")`
 // ccInner.style['backdrop-filter'] = 'invert(0.8)';
-ccInner.style['backdrop-filter'] = "url('#cvd_extension_0')";
+ccInner.style['backdrop-filter'] = "url('#cvd')";
 ccInner.style['pointer-events'] = 'none';
 
 // TopLeft Corner

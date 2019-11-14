@@ -18,17 +18,9 @@
     <p>STEP 1: Choose a Preset</p>
 <div class = "radios">
     <input type="radio" name="test" value="NORMAL"> Normal<br>
-    <input type="radio" name="test" value="PROTANOPIA"> Protanopia<br>
-    <input type="radio" name="test" value="PROTANOMALY"> Protanomaly<br>
-    <input type="radio" name="test" value="DEUTERANOPIA"> Deuteranopia<br>
-    <input type="radio" name="test" value="DEUTERANOMALY"> Deuteranomaly<br>
-    <input type="radio" name="test" value="TRITANOPIA"> Tritanopia<br>
-    <input type="radio" name="test" value="TRITANOMALY"> Tritanomaly<br>
-    <input type="radio" name="test" value="ACHROMATOPSIA"> Achromatopsia<br>
-    <input type="radio" name="test" value="ACHROMATOLAMY"> Achromatolamy<br>
-    <input type="radio" name="test" value="LOW-CONTRAST"> Low-Contrast
-   
-
+    <input type="radio" name="test" value="PROTANOPIA-PROTANOMALY"> Protanopia / Protanomaly<br>
+    <input type="radio" name="test" value="DEUTERANOPIA-DEUTERANOMALY"> Deuteranopia / Deuteranomaly<br>
+    <input type="radio" name="test" value="TRITANOPIA-TRITANOMALY"> Tritanopia / Tritanomaly<br>
   </div>
 
     <!-- Display -->
@@ -88,9 +80,9 @@
 
      <html lang="en-US">
 
-        <div class="slider">
-        <input type = "range" min="0" max="100" onchange="rangevalue.value=value"/>
-        <output id="rangevalue">50</output>
+        <div class="slider" style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+        <input id="severity-slider" type = "range" min="0" max="100" value="25"/>
+        <output id="severity-value" style="display: inline-block; width: 20px;">25</output>
         </div>
 
 <button id="apply-color-change" class="apply">Apply</button>

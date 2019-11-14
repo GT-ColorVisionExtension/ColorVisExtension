@@ -11,11 +11,77 @@
   <title>CHROME-ATIC</title>
 </head>
 <body>
-  <p>CHROMATIC</p>
-  <img src="img/LOGORE.png">
-  
-  <button class="enter">
-    <a href="options.html">Enter</a>
-  </button>
+  <div class="Header">
+  <h1>CHROMATIC </h1>
+  </div>
+  <p>STEP 1: Choose a Preset</p>
+<div class = "radios">
+  <div class="active-cvd-choice">
+    <div style="float: left;">
+      <input type="radio" name="vision-type" value="NORMAL">
+    </div>
+    <div style="float: right; width: 90%; padding-left: 10px;">
+      Normal
+      <div style="width: 100%; height: 50px; background-color: red;"></div>
+    </div>
+  </div>
+  <div>
+    <div style="float: left;">
+      <input type="radio" name="vision-type" value="PROTANOPIA-PROTANOMALY">
+    </div>
+    <div style="float: right; width: 90%; padding-left: 10px;">
+      Protanopia / Protanomaly
+      <div style="width: 100%; height: 50px; background-color: red;"></div>
+    </div>
+  </div>
+  <div>
+    <div style="float: left;">
+      <input type="radio" name="vision-type" value="DEUTERANOPIA-DEUTERANOMALY">
+    </div>
+    <div style="float: right; width: 90%; padding-left: 10px;">
+      Deuteranopia / Deuteranomaly
+      <div style="width: 100%; height: 50px; background-color: yellow;"></div>
+    </div>
+  </div>
+  <div>
+    <div style="float: left;">
+      <input type="radio" name="vision-type" value="TRITANOPIA-TRITANOMALY">
+    </div>
+    <div style="float: right; width: 90%; padding-left: 10px;">
+      Tritanopia / Tritanomaly
+      <div style="width: 100%; height: 50px; background-color: green;"></div>
+    </div>
+  </div>
+</div>
+
+<p>Step 2: Adjust the Slider</p>
+
+<div class="slider">
+  <label for="severity-slider">Severity</label>
+  <input id="severity-slider" name="severity-slider" type = "range" min="0" max="100" value="100"/>
+  <output id="severity-value" style="display: inline-block; width: 20px;">1</output>
+</div>
+
+<div class="slider">
+  <label for="hue-slider">Hue</label>
+  <input id="hue-slider" name="hue-slider" type = "range" min="0" max="360" value="0"/>
+  <output id="hue-value" style="display: inline-block; width: 20px;">0</output>
+</div>
+
+<div class="slider">
+  <label for="saturation-slider">Saturation</label>
+  <input id="saturation-slider" name="saturation-slider" type = "range" min="0" max="300" value="100"/>
+  <output id="saturation-value" style="display: inline-block; width: 20px;">100%</output>
+</div>
+
+<div class="slider">
+  <label for="value-slider">Value</label>
+  <input id="value-slider" name="value-slider" type = "range" min="0" max="300" value="100"/>
+  <output id="value-value" style="display: inline-block; width: 20px;">100%</output>
+</div>
+
+<button id="apply-color-change" class="apply">Apply</button>
+<button class="cancel">Cancel</button>
+
 </body>
 </html>

@@ -3,22 +3,26 @@ import FilterWindow from './filterWindow';
 
 let filterWindows = [new FilterWindow(document.body)];
 
-function addFilterWindow() {
-  filterWindows.push(new FilterWindow(document.body));
-}
-
-function updateSeverity(severity) {
+function updateSeverities(severity) {
   if (severity !== undefined) {
     for (let i = 0; i < filterWindows.length; i++) {
-      filterWindows[i].updateSeverityFilter(parseFloat(msg.severity));
+      filterWindows[i].updateSeverityFilter(severity);
     }
   }
 }
 
-function updateHSV(h, s, v) {
+function updateHSVs(h, s, v) {
   if (h !== undefined && s !== undefined && v !== undefined) {
     for (let i = 0; i < filterWindows.length; i++) {
       filterWindows[i].updateHSV(h, s, v);
+    }
+  }
+}
+
+function updateSeverityTypes(severity, severityType) {
+  if (severityType !== undefined) {
+    for (let i = 0; i < filterWindows.length; i++) {
+      filterWindows[i].updateSeverityType(severity, severityType);
     }
   }
 }
@@ -29,24 +33,14 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     sendResponse({ status: "yes" });
     return;
   }
-
-  // When the Enable/Disable button is pressed, set the current state of the windows.
-  if (msg.toggleStatus === 'toggleStatus') {
-    // Get the current status
+  
+  if (msg.currentStatus === 'currentStatus?') {
+    // If a request to learn the current status is sent, return it
+    console.log(filterWindows.length);
     if (filterWindows.length > 0) {
-      // If currently enabled, disable by first telling each window to remove themselves
-      // from the DOM. Then, delete each FilterWindow in filterWindows
-      for (let i = 0; i < filterWindows.length; i++) {
-        filterWindows[i].removeFromDOM();
-      }
-      filterWindows = [];
-
-      // Send back a response that the windows are now disabled.
-      sendResponse({ currentStatus: 'disabled' });
-    } else {
-      // If currently disabled, reenable by adding a new window.
-      filterWindows.push(new FilterWindow(document.body));
       sendResponse({ currentStatus: 'enabled' });
+    } else {
+      sendResponse({ currentStatus: 'disabled' });
     }
 
     return;
@@ -64,24 +58,29 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     return;
   }
 
+
   if (msg.enable === 'enable') {
     // If an enable request is sent, add a filter window.
-    filterWindows.push(new FilterWindow(document.body));
-    sendResponse({ currentStatus: 'enabled' });
-
-    return;
-  }
-
-  if (msg.currentStatus === 'currentStatus?') {
-    // If a request to learn the current status is sent, return it
-    if (filterWindows.length > 0) {
-      sendResponse({ currentStatus: 'enabled' });
-    } else {
-      sendResponse({ currentStatus: 'disabled' });
+    if (filterWindows.length < 0) {
+      filterWindows.push(new FilterWindow(document.body));
     }
-
+    sendResponse({ currentStatus: 'enabled' });
     return;
   }
 
-  //
+  if (msg.severityType !== undefined && typeof msg.severity === 'number') {
+    console.log(msg.severityType);
+    updateSeverityTypes(msg.severity, msg.severityType);
+    sendResponse({ updated: true });
+  } else if (typeof msg.severity === 'number') {
+    console.log('Got the severity number!');
+    console.log(msg.severity);
+    updateSeverities(msg.severity);
+    sendResponse({ updated: true });
+  }
+
+  if (typeof msg.hueValue === 'number' && typeof msg.saturationValue === 'number' && typeof msg.valueValue === 'number') {
+    updateHSVs(msg.hueValue, msg.saturationValue, msg.valueValue);
+    sendResponse({ updated: true });
+  }
 });

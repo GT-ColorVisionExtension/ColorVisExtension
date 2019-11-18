@@ -1,4 +1,5 @@
 import ANOMALY from "./anomalyDefaults";
+import { saveSettings } from "./storage";
 
 class FilterWindow {
   /**
@@ -13,10 +14,20 @@ class FilterWindow {
     this.lineThickness = 3;
     this.x = 100;
     this.y = 100;
+    this.severityType = ANOMALY.NONE;
+    this.anomaly = 'NONE';
+    this.severity = 1;
+    this.hue = 0;
+    this.saturation = 100;
+    this.value = 100;
 
     // Create an SVG Element
     const NS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(NS, "svg");
+    svg.setAttributeNS(null, "width", "0");
+    svg.setAttributeNS(null, "height", "0");
+
+    // Create filters
     const filter_0 = document.createElementNS(NS, "filter");
     filter_0.setAttributeNS(null, "id", "cvd_0");
     const matrix_0 = document.createElementNS(NS, "feColorMatrix");
@@ -271,13 +282,17 @@ class FilterWindow {
   }
 
   updateSeverityFilter(value) {
+    console.log(value);
     const next = 1 - this.currentMatrix;
-    const matrixString = generateSeverityMatrix(value, ANOMALY.PROTANOMALIES);
+    const matrixString = generateSeverityMatrix(value, this.severityType);
     this["matrix_" + 0].setAttribute("values", matrixString);
     this["matrix_" + 1].setAttribute("values", matrixString);
     this.ccInner.style["backdrop-filter"] = `url('#cvd_${next}')`;
 
     this.currentMatrix = next;
+
+    this.severity = value;
+    this.onUpdate();
   }
 
   updateHSV(hue, sat, val) {
@@ -286,10 +301,45 @@ class FilterWindow {
     const s = sat / 100;
     const v = val / 100;
     const matrixString = generateHSVMatrix(h, s, v);
+
+    // Ensure the app will round to normal values near the defaults
+    if ((h < 1 || h > 359) && (s > 0.97 && s < 1.07) && (v > 0.97 && v < 1.07)) {
+      this["matrix_" + 0 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+      this["matrix_" + 1 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+    }
+
     this["matrix_" + 0 + "_hsv"].setAttribute("values", matrixString);
     this["matrix_" + 1 + "_hsv"].setAttribute("values", matrixString);
     this.ccInner.style["backdrop-filter"] = `url('#cvd_${next}')`;
     this.currentMatrix = next;
+
+    this.hue = hue;
+    this.saturation = sat;
+    this.value = val;
+    this.onUpdate();
+  }
+
+  updateSeverityType(severity, severityType) {
+    if (severityType === 'NONE') {
+      console.log('Setting anomaly to none')
+      this.severityType = ANOMALY.NONE;
+    } else if (severityType === 'PROTANOMALIES') {
+      console.log('Setting anomaly to protanomaly')
+      this.severityType = ANOMALY.PROTANOMALIES;
+    } else if (severityType === 'DEUTERANOMALIES') {
+      console.log('Deuteranomaly setting')
+      this.severityType = ANOMALY.DEUTERANOMALIES;
+    } else if (severityType === 'TRITANOMALIES') {
+      console.log('Tritanomaly setting');
+      this.severityType = ANOMALY.TRITANOMALIES;
+    }
+
+    this.anomaly = severityType;
+    this.updateSeverityFilter(severity); // this calls onUpdate to save later
+  }
+
+  onUpdate() {
+    saveSettings(this.anomaly, this.severity, this.hue, this.saturation, this.value);
   }
 
   removeFromDOM() {
@@ -352,8 +402,6 @@ function generateHSVMatrix(hue, sat, val) {
   }
 
   matrix.push(["0", "0", "0", "1", "0"]);
-
-  console.log(matrix);
   return matrix.flat().join(" ");
 }
 
@@ -366,7 +414,10 @@ function generateSeverityMatrix(severity, visionType) {
   const upper = (Math.ceil(severity * 10) / 10).toFixed(1);
 
   if (lower === upper) {
-    return upper.flat().join(" ");
+    console.log(visionType);
+    console.log(upper);
+    console.log(visionType[upper]);
+    return visionType[upper].flat().join(" ");
   }
 
   const matrix = interpolateMatrices(
@@ -384,7 +435,7 @@ function interpolateMatrices(matrix1, matrix2, min, max, value) {
   const percent = (value - min) / range;
 
   // Create output matrix
-  matrixOut = [];
+  const matrixOut = [];
 
   for (let y = 0; y < matrix1.length; y++) {
     matrixOut[y] = [];

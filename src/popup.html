@@ -12,10 +12,10 @@
     <div class="Header">
       <h1>CHROMATIC</h1>
     </div>
-    <p>STEP 1: Choose a Vision Type</p>
+    <p>STEP 1: Choose a Vision Type (pick the one with the faintest stars)</p>
 
     <form name="cvd-types">
-      <div class="radios">
+      <div id="radios" class="radios">
         <div class="cc-radio-container cc-normal active-cvd-choice">
           <div style="float: left;">
             <input type="radio" name="vision-type" value="NONE" />
@@ -89,7 +89,7 @@
         </div>
       </div>
     </form>
-    <p>Step 2: Adjust the Slider</p>
+    <p>Step 2: Choose the severity of your CVD. Adjust until the stars are more visible.</p>
 
     <div class="slider">
       <label for="severity-slider">Severity</label>
@@ -101,10 +101,11 @@
         max="100"
         value="100"
       />
-      <output id="severity-value" style="display: inline-block; width: 20px;"
-        >1</output
-      >
+      <output id="severity-value" style="display: inline-block; width: 20px;">100%</output>
+      <button id="reset-severity" class="slider-button">Reset</button>
     </div>
+
+    <p>Step 3: Adjust additional color settings.</p>
 
     <div class="slider">
       <label for="hue-slider">Hue</label>
@@ -116,9 +117,8 @@
         max="360"
         value="0"
       />
-      <output id="hue-value" style="display: inline-block; width: 20px;"
-        >0</output
-      >
+      <output id="hue-value" style="display: inline-block; width: 20px;">0°</output>
+      <button id="reset-hue" class="slider-button">Reset</button>
     </div>
 
     <div class="slider">
@@ -131,9 +131,8 @@
         max="300"
         value="100"
       />
-      <output id="saturation-value" style="display: inline-block; width: 20px;"
-        >100%</output
-      >
+      <output id="saturation-value" style="display: inline-block; width: 20px;">100%</output>
+      <button id="reset-sat" class="slider-button">Reset</button>
     </div>
 
     <div class="slider">
@@ -146,12 +145,11 @@
         max="300"
         value="100"
       />
-      <output id="value-value" style="display: inline-block; width: 20px;"
-        >100%</output
-      >
+      <output id="value-value" style="display: inline-block; width: 20px;">100%</output>
+      <button id="reset-val" class="slider-button">Reset</button>
     </div>
 
     <button id="enable-disable" class="apply">Disable</button>
-    <button id="save">Save Settings</button>
+    <button id="cc-full-screen" class="apply">Full Screen</button>
   </body>
 </html>

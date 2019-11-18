@@ -8,12 +8,12 @@ class FilterWindow {
   constructor(target) {
     // General settings
     this.target = target;
-    this.defaultWidth = 800;
-    this.defaultHeight = 600;
+    this.defaultWidth = 400;
+    this.defaultHeight = 300;
     this.cornerSize = 20;
     this.lineThickness = 3;
-    this.x = 100;
-    this.y = 100;
+    this.x = 50;
+    this.y = 50;
     this.severityType = ANOMALY.NONE;
     this.anomaly = 'NONE';
     this.severity = 1;
@@ -102,11 +102,12 @@ class FilterWindow {
     // TopLeft Corner
     this.ccTopLeft = document.createElement("div");
     this.target.appendChild(this.ccTopLeft);
+    this.ccTopLeft.setAttribute("class", "ccTopLeft");
     this.ccTopLeft.style.position = "fixed";
     this.ccTopLeft.style.width = `${this.cornerSize}px`;
     this.ccTopLeft.style.height = `${this.cornerSize}px`;
-    this.ccTopLeft.style.borderLeft = `${this.lineThickness}px solid red`;
-    this.ccTopLeft.style.borderTop = `${this.lineThickness}px solid red`;
+    // this.ccTopLeft.style.borderLeft = `${this.lineThickness}px solid red`;
+    // this.ccTopLeft.style.borderTop = `${this.lineThickness}px solid red`;
     this.ccTopLeft.style.boxSizing = "border-box";
     this.ccTopLeft.style.left = `${this.x}px`;
     this.ccTopLeft.style.top = `${this.y}px`;
@@ -117,11 +118,12 @@ class FilterWindow {
     // TopRight Corner
     this.ccTopRight = document.createElement("div");
     this.target.appendChild(this.ccTopRight);
+    this.ccTopRight.setAttribute("class", "ccTopRight");
     this.ccTopRight.style.position = "fixed";
     this.ccTopRight.style.width = `${this.cornerSize}px`;
     this.ccTopRight.style.height = `${this.cornerSize}px`;
-    this.ccTopRight.style.borderRight = `${this.lineThickness}px solid red`;
-    this.ccTopRight.style.borderTop = `${this.lineThickness}px solid red`;
+    // this.ccTopRight.style.borderRight = `${this.lineThickness}px solid red`;
+    // this.ccTopRight.style.borderTop = `${this.lineThickness}px solid red`;
     this.ccTopRight.style.boxSizing = "border-box";
     this.ccTopRight.style.left = `${this.x +
       this.defaultWidth -
@@ -133,11 +135,12 @@ class FilterWindow {
 
     this.ccBottomLeft = document.createElement("div");
     this.target.appendChild(this.ccBottomLeft);
+    this.ccBottomLeft.setAttribute("class", "ccBottomLeft");
     this.ccBottomLeft.style.position = "fixed";
     this.ccBottomLeft.style.width = `${this.cornerSize}px`;
     this.ccBottomLeft.style.height = `${this.cornerSize}px`;
-    this.ccBottomLeft.style.borderLeft = `${this.lineThickness}px solid red`;
-    this.ccBottomLeft.style.borderBottom = `${this.lineThickness}px solid red`;
+    // this.ccBottomLeft.style.borderLeft = `${this.lineThickness}px solid red`;
+    // this.ccBottomLeft.style.borderBottom = `${this.lineThickness}px solid red`;
     this.ccBottomLeft.style.boxSizing = "border-box";
     this.ccBottomLeft.style.left = `${this.x}px`;
     this.ccBottomLeft.style.top = `${this.y +
@@ -149,11 +152,12 @@ class FilterWindow {
 
     this.ccBottomRight = document.createElement("div");
     this.target.appendChild(this.ccBottomRight);
+    this.ccBottomRight.setAttribute("class", "ccBottomRight");
     this.ccBottomRight.style.position = "fixed";
     this.ccBottomRight.style.width = `${this.cornerSize}px`;
     this.ccBottomRight.style.height = `${this.cornerSize}px`;
-    this.ccBottomRight.style.borderRight = `${this.lineThickness}px solid red`;
-    this.ccBottomRight.style.borderBottom = `${this.lineThickness}px solid red`;
+    // this.ccBottomRight.style.borderRight = `${this.lineThickness}px solid red`;
+    // this.ccBottomRight.style.borderBottom = `${this.lineThickness}px solid red`;
     this.ccBottomRight.style.boxSizing = "border-box";
     this.ccBottomRight.style.left = `${this.x +
       this.defaultWidth -
@@ -303,10 +307,10 @@ class FilterWindow {
     const matrixString = generateHSVMatrix(h, s, v);
 
     // Ensure the app will round to normal values near the defaults
-    if ((h < 1 || h > 359) && (s > 0.97 && s < 1.07) && (v > 0.97 && v < 1.07)) {
-      this["matrix_" + 0 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
-      this["matrix_" + 1 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
-    }
+    // if ((h < 1 || h > 359) && (s > 0.97 && s < 1.07) && (v > 0.97 && v < 1.07)) {
+    //   this["matrix_" + 0 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+    //   this["matrix_" + 1 + "_hsv"].setAttribute("values", "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+    // }
 
     this["matrix_" + 0 + "_hsv"].setAttribute("values", matrixString);
     this["matrix_" + 1 + "_hsv"].setAttribute("values", matrixString);
@@ -449,3 +453,4 @@ function interpolateMatrices(matrix1, matrix2, min, max, value) {
 }
 
 export default FilterWindow;
+export { generateSeverityMatrix, generateHSVMatrix };

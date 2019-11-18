@@ -1,5 +1,118 @@
 import "../css/options.css";
 import { getSavedSettings } from './storage';
+import { generateSeverityMatrix, generateHSVMatrix} from './filterWindow';
+import ANOMALY from "./anomalyDefaults";
+
+/* Set up the pop up's SVG filters */
+// Create an SVG Element
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(NS, "svg");
+svg.setAttributeNS(null, "width", "0");
+svg.setAttributeNS(null, "height", "0");
+
+// Create filters
+const filter_0 = document.createElementNS(NS, "filter");
+filter_0.setAttributeNS(null, "id", "cvd_0");
+const matrix_0 = document.createElementNS(NS, "feColorMatrix");
+matrix_0.setAttributeNS(null, "in", "hsv");
+matrix_0.setAttributeNS(null, "type", "matrix");
+matrix_0.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+const matrix_0_hsv = document.createElementNS(NS, "feColorMatrix");
+matrix_0_hsv.setAttributeNS(null, "in", "SourceGraphic");
+matrix_0_hsv.setAttributeNS(null, "type", "matrix");
+matrix_0_hsv.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+matrix_0_hsv.setAttributeNS(null, "result", "hsv");
+
+const filter_1 = document.createElementNS(NS, "filter");
+filter_1.setAttributeNS(null, "id", "cvd_1");
+const matrix_1 = document.createElementNS(NS, "feColorMatrix");
+matrix_1.setAttributeNS(null, "in", "hsv");
+matrix_1.setAttributeNS(null, "type", "matrix");
+matrix_1.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+const matrix_1_hsv = document.createElementNS(NS, "feColorMatrix");
+matrix_1_hsv.setAttributeNS(null, "in", "SourceGraphic");
+matrix_1_hsv.setAttributeNS(null, "type", "matrix");
+matrix_1_hsv.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+matrix_1_hsv.setAttributeNS(null, "result", "hsv");
+
+filter_0.appendChild(matrix_0_hsv);
+filter_0.appendChild(matrix_0);
+filter_1.appendChild(matrix_1_hsv);
+filter_1.appendChild(matrix_1);
+svg.appendChild(filter_0);
+svg.appendChild(filter_1);
+document.body.appendChild(svg);
+
+// Apply SVG filters to radios div
+let settings = {};
+const radios = document.getElementById("radios");
+let anomalyName = 'NONE';
+let anomalyData = ANOMALY.NONE;
+let currentMatrix = 0;
+let next = 0;
+radios.style.filter = "url('#cvd_0')";
+
+// Functions to update the popup.html filters
+function updateThumbnailSeverity(value) {
+  next = 1 - currentMatrix;
+  const matrixString = generateSeverityMatrix(value, anomalyData);
+  matrix_0.setAttribute("values", matrixString);
+  matrix_1.setAttribute("values", matrixString);
+  radios.style.filter = `url('#cvd_${next}')`;
+  currentMatrix = next;
+}
+
+function updateThumbnailSeverityType(severity, severityType) {
+  if (severityType === 'NONE') {
+    anomalyData = ANOMALY.NONE;
+  } else if (severityType === 'PROTANOMALIES') {
+    anomalyData = ANOMALY.PROTANOMALIES;
+  } else if (severityType === 'DEUTERANOMALIES') {
+    anomalyData = ANOMALY.DEUTERANOMALIES;
+  } else if (severityType === 'TRITANOMALIES') {
+    anomalyData = ANOMALY.TRITANOMALIES;
+  }
+
+  anomalyName = severityType;
+  updateThumbnailSeverity(severity);
+}
+
+function updateThumbnailHSV(hue, sat, val) {
+  const next = 1 - currentMatrix;
+  const h = hue;
+  const s = sat / 100;
+  const v = val / 100;
+  const matrixString = generateHSVMatrix(h, s, v);
+
+  matrix_0_hsv.setAttribute("values", matrixString);
+  matrix_1_hsv.setAttribute("values", matrixString);
+  radios.style.filter = `url('#cvd_${next}')`;
+  currentMatrix = next;
+}
+
+// Apply filters to the thumbnails on first run using loaded data
+(async function() {
+  settings = await getSavedSettings();
+  updateThumbnailSeverityType(settings['severity'], settings['anomaly']);
+  updateThumbnailHSV(settings['hue'], settings['saturation'], settings['value']);
+})();
+
 
 /* Set up Sliders */
 const severitySlider = document.getElementById("severity-slider");
@@ -11,10 +124,12 @@ function updateSeverity(e, severity) {
       severitySlider.value = severity.toString();
     }
     const percent = severity !== undefined ? severity / 100 : parseInt(severitySlider.value, 10) / 100;
-    severityText.innerText = percent;
+    severityText.innerText = Math.round(percent * 100) + '%';
   
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, { severity: percent }, msg => {
+        // Also set new severity values to the popup's state data.
+        updateThumbnailSeverity(percent);
         resolve();
       });
     });
@@ -30,7 +145,7 @@ function updateHue(e, hue) {
       hueSlider.value = hue.toString();
     }
     const value = hue !== undefined? hue : parseInt(hueSlider.value, 10);
-    hueText.innerText = value;
+    hueText.innerText = value + '°';
   
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {
@@ -38,6 +153,7 @@ function updateHue(e, hue) {
         saturationValue: parseInt(saturationSlider.value, 10),
         valueValue: parseInt(valueSlider.value, 10)
       }, msg => {
+        updateThumbnailHSV(value, parseInt(saturationSlider.value, 10), parseInt(valueSlider.value, 10));
         resolve();
       });
     });
@@ -61,6 +177,7 @@ function updateSaturation(e, sat) {
         saturationValue: value,
         valueValue: parseInt(valueSlider.value, 10)
       }, msg => {
+        updateThumbnailHSV(parseInt(hueSlider.value, 10), value, parseInt(valueSlider.value, 10));
         resolve();
       });
     });
@@ -84,6 +201,7 @@ function updateValue(e, val) {
         saturationValue: parseInt(saturationSlider.value, 10),
         valueValue: value
       }, msg => {
+        updateThumbnailHSV(parseInt(hueSlider.value, 10), parseInt(saturationSlider.value, 10), value);
         resolve();
       });
     });
@@ -97,7 +215,7 @@ function updateHueSaturationValue(h, s, v) {
       saturationSlider.value = s.toString();
       valueSlider.value = v.toString();
     }
-    hueText.innerText = h;
+    hueText.innerText = h + '°';
     saturationText.innerText = s + '%';
     valueText.innerText = v + '%';
 
@@ -107,6 +225,7 @@ function updateHueSaturationValue(h, s, v) {
         saturationValue: s,
         valueValue: v
       }, msg => {
+        updateThumbnailHSV(h, s, v);
         resolve();
       });
     });
@@ -147,11 +266,22 @@ function updateSeverityType(type) {
 
       // Send message to update severity type
       chrome.tabs.sendMessage(tabs[0].id, {severity: parseInt(severitySlider.value, 10) / 100, severityType: rad[index].value}, () => {
+        updateThumbnailSeverityType(parseInt(severitySlider.value, 10) / 100, rad[index].value)
         resolve();
       })
     });
   })
 }
+
+/* Slider Reset Buttons */
+const btnResetSev = document.getElementById("reset-severity");
+btnResetSev.onclick = () => updateSeverity(null, 0);
+const btnResetHue = document.getElementById("reset-hue");
+btnResetHue.onclick = () => updateHue(null, 0);
+const btnResetSat = document.getElementById("reset-sat");
+btnResetSat.onclick = () => updateSaturation(null, 100);
+const btnResetVal = document.getElementById("reset-val");
+btnResetVal.onclick = () => updateValue(null, 100);
 
 // Run script when extension pop-up is opened.
 chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -162,14 +292,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       console.log("Script hasn't run yet. Injecting.");
       chrome.tabs.executeScript(
         tabs[0].id, { file: "contentScript.bundle.js"}, async () => {
-          // chrome.tabs.sendMessage(tabs[0].id, { init: "windows" });
-
-          // Run severity and HSV update immediately.
-          // const settings = await getSavedSettings();
-          // await updateSeverity(null, settings['severity']);
-          // console.log(settings['hue'], settings['saturation'], settings['value']);
-          // await updateHueSaturationValue(settings['hue'], settings['saturation'], settings['value']);
-          // await updateSeverity(null, settings['severity']);
           enableExtension(tabs);
         }
       );
@@ -189,30 +311,51 @@ toggleButton.onclick = async function(element) {
       msg = msg || {};
       if (msg.currentStatus && msg.currentStatus === "enabled") {
         // Since the extension is currently enabled, disable it.
+        console.log('Disabling extension');
         disableExtension(tabs);
       } else {
         // Since the extension is currently disabled, enable it.
+        console.log('Enable extension');
         enableExtension(tabs);
       }
     });
   });
 };
 
+// Allow option for full screen once the filter windows are already drawn
+const toggleFullScreen = document.getElementById("cc-full-screen");
+toggleFullScreen.onclick = function() {
+  console.log('Enabling full screen');
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    chrome.tabs.sendMessage(tabs[0].id, { fullscreen: 'fullscreen' });
+  });
+}
+
 function disableExtension(tabs) {
   chrome.tabs.sendMessage(tabs[0].id, { disable: 'disable' }, msg => {
     toggleButton.innerText = 'Enable';
   });
+
+  toggleFullScreen.style.display = 'none';
 }
 
 function enableExtension(tabs) {
   chrome.tabs.sendMessage(tabs[0].id, { enable: 'enable' }, async (msg) => {
     const settings = await getSavedSettings();
     console.log(settings);
-    await updateSeverity(null, settings['severity'] * 100);
-    await updateSeverityType(settings['anomaly']);
-    await updateHueSaturationValue(settings['hue'], settings['saturation'], settings['value']);
-    // await updateSeverity(null, settings['severity']);
-
-    toggleButton.innerText = 'Disable';
+    // Have to use setTimeout to increase the chances that the browser will
+    // recognize and paint the changes we're making to the DOM
+    updateSeverity(null, settings['severity'] * 100).then(() => {
+      setTimeout(() => {
+        updateSeverityType(settings['anomaly']).then(() => {
+          setTimeout(() => {
+            updateHueSaturationValue(settings['hue'], settings['saturation'], settings['value']).then(() => {
+              toggleButton.innerText = 'Disable';
+              toggleFullScreen.style.display = 'inline';
+            })
+          }, 60)
+        })
+      }, 60)
+    })
   });
 }

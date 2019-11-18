@@ -72,6 +72,13 @@ button {
   margin-top: 15px;
 }
 
+button.slider-button {
+  border-radius: 5px;
+  background-color: rgb(34, 39, 44); 
+  color: white;
+  margin: 0 0 0 20px;
+}
+
 .cc-normal, .cc-protanomaly, .cc-deuteranomaly, .cc-tritanomaly {
   border-radius: 8px;
   border: 2px solid rgba(0, 0, 0, 0);

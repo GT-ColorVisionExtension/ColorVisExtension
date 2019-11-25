@@ -10,6 +10,7 @@ function addCss(rule) {
   document.getElementsByTagName("head")[0].appendChild(css);
 }
 
+// https://stackoverflow.com/questions/28365839/dashed-border-animation-in-css3-animation
 function addExtensionCss() {
   addCss(`
   :root {
@@ -57,7 +58,7 @@ function addExtensionCss() {
   .ccTopLeft, .ccTopRight, .ccBottomLeft, .ccBottomRight {
     height: 100px;
     width: 200px;
-    background: linear-gradient(90deg, blue 50%, transparent 50%), linear-gradient(90deg, blue 50%, transparent 50%), linear-gradient(0deg, blue 50%, transparent 50%), linear-gradient(0deg, blue 50%, transparent 50%);
+    background: linear-gradient(90deg, red 50%, transparent 50%), linear-gradient(90deg, red 50%, transparent 50%), linear-gradient(0deg, red 50%, transparent 50%), linear-gradient(0deg, red 50%, transparent 50%);
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-size: 15px 4px, 15px 4px, 4px 15px, 4px 15px;
     padding: 10px;
@@ -111,6 +112,81 @@ function updateSeverityTypes(severity, severityType) {
   }
 }
 
+function updateRGBs(r, g, b) {
+  if (r !== undefined && g !== undefined && b !== undefined) {
+    for (let i = 0; i < filterWindows.length; i++) {
+      filterWindows[i].updateRGB(r, g, b);
+    }
+  }
+}
+
+function updatePositionAndSize(x, y, width, height) {
+  for (let i = 0; i < filterWindows.length; i++) {
+    filterWindows[i].ccTopLeft.style.left = `${x}px`;
+    filterWindows[i].ccTopLeft.style.top = `${y}px`;
+    filterWindows[i].ccTopRight.style.left = `${width - filterWindows[i].cornerSize}px`;
+    filterWindows[i].ccTopRight.style.top = `${x}px`;
+    filterWindows[i].ccBottomLeft.style.left = `${y}px`;
+    filterWindows[i].ccBottomLeft.style.top = `${height - filterWindows[i].cornerSize}px`;
+    filterWindows[i].ccBottomRight.style.left = `${width - filterWindows[i].cornerSize}px`;
+    filterWindows[i].ccBottomRight.style.top = `${height - filterWindows[i].cornerSize}px`;
+
+    filterWindows[i].ccInner.style.width = `${Math.abs(width)}px`;
+    filterWindows[i].ccInner.style.height = `${Math.abs(height)}px`;
+    filterWindows[i].ccInner.style.left = `${x}px`;
+    filterWindows[i].ccInner.style.top = `${y}px`;
+
+    filterWindows[i].width = width;
+    filterWindows[i].height = height;
+    filterWindows[i].x = x;
+    filterWindows[i].y = y;
+
+    if (
+      filterWindows[i].ccTopLeft.offsetLeft <=
+        filterWindows[i].ccTopRight.offsetLeft + filterWindows[i].cornerSize &&
+      filterWindows[i].ccTopLeft.offsetTop <=
+        filterWindows[i].ccBottomLeft.offsetTop + filterWindows[i].cornerSize
+    ) {
+      filterWindows[i].ccInner.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccTopLeft.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccTopRight.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccBottomLeft.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccBottomRight.style.transform = "scaleX(1) scaleY(1)";
+    } else if (
+      filterWindows[i].ccTopLeft.offsetLeft >
+        filterWindows[i].ccTopRight.offsetLeft + filterWindows[i].cornerSize &&
+      filterWindows[i].ccTopLeft.offsetTop <=
+        filterWindows[i].ccBottomLeft.offsetTop + filterWindows[i].cornerSize
+    ) {
+      filterWindows[i].ccInner.style.transform = "scaleX(-1) scaleY(1)";
+      filterWindows[i].ccTopLeft.style.transform = "scaleX(-1) scaleY(1)";
+      filterWindows[i].ccTopRight.style.transform = "scaleX(-1) scaleY(1)";
+      filterWindows[i].ccBottomLeft.style.transform = "scaleX(-1) scaleY(1)";
+      filterWindows[i].ccBottomRight.style.transform = "scaleX(-1) scaleY(1)";
+    } else if (
+      filterWindows[i].ccTopLeft.offsetLeft <=
+        filterWindows[i].ccTopRight.offsetLeft + filterWindows[i].cornerSize &&
+      filterWindows[i].ccTopLeft.offsetTop > filterWindows[i].ccBottomLeft.offsetTop + filterWindows[i].cornerSize
+    ) {
+      filterWindows[i].ccInner.style.transform = "scaleX(1) scaleY(-1)";
+      filterWindows[i].ccTopLeft.style.transform = "scaleX(1) scaleY(-1)";
+      filterWindows[i].ccTopRight.style.transform = "scaleX(1) scaleY(-1)";
+      filterWindows[i].ccBottomLeft.style.transform = "scaleX(1) scaleY(-1)";
+      filterWindows[i].ccBottomRight.style.transform = "scaleX(1) scaleY(-1)";
+    } else if (
+      filterWindows[i].ccTopLeft.offsetLeft >
+        filterWindows[i].ccTopRight.offsetLeft + filterWindows[i].cornerSize &&
+      filterWindows[i].ccTopLeft.offsetTop > filterWindows[i].ccBottomLeft.offsetTop + filterWindows[i].cornerSize
+    ) {
+      filterWindows[i].ccInner.style.transform = "scaleX(-1) scaleY(-1)";
+      filterWindows[i].ccTopLeft.style.transform = "scaleX(-1) scaleY(-1)";
+      filterWindows[i].ccTopRight.style.transform = "scaleX(-1) scaleY(-1)";
+      filterWindows[i].ccBottomLeft.style.transform = "scaleX(-1) scaleY(-1)";
+      filterWindows[i].ccBottomRight.style.transform = "scaleX(-1) scaleY(-1)";
+    }
+  }
+}
+
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
   // When the pop-up window is opened, it'll ask if the script is already injected
   if (msg.text === "script_injected?") {
@@ -120,7 +196,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
   
   if (msg.currentStatus === 'currentStatus?') {
     // If a request to learn the current status is sent, return it
-    console.log(filterWindows.length);
     if (filterWindows.length > 0) {
       sendResponse({ currentStatus: 'enabled' });
     } else {
@@ -147,8 +222,6 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
   if (msg.enable === 'enable') {
     // If an enable request is sent, add a filter window.
     if (filterWindows.length < 1) {
-      console.log(filterWindows);
-      console.log(filterWindows.length);
       filterWindows.push(new FilterWindow(document.body));
     }
     sendResponse({ currentStatus: 'enabled' });
@@ -179,21 +252,26 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
       filterWindows[i].ccInner.style.left = `${filterWindows[i].ccTopLeft.offsetLeft}px`;
       filterWindows[i].ccInner.style.top = `${filterWindows[i].ccTopLeft.offsetTop}px`;
 
-      self.ccInner.style.transform = "scaleX(1) scaleY(1)";
-      self.ccTopLeft.style.transform = "scaleX(1) scaleY(1)";
-      self.ccTopRight.style.transform = "scaleX(1) scaleY(1)";
-      self.ccBottomLeft.style.transform = "scaleX(1) scaleY(1)";
-      self.ccBottomRight.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].width = width;
+      filterWindows[i].height = height;
+      filterWindows[i].x = filterWindows[i].ccTopLeft.offsetLeft;
+      filterWindows[i].y = filterWindows[i].ccTopLeft.offsetTop;
+      filterWindows[i].fullscreen = true;
+
+      filterWindows[i].ccInner.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccTopLeft.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccTopRight.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccBottomLeft.style.transform = "scaleX(1) scaleY(1)";
+      filterWindows[i].ccBottomRight.style.transform = "scaleX(1) scaleY(1)";
+
+      filterWindows[i].onUpdate();
     }
   }
 
   if (msg.severityType !== undefined && typeof msg.severity === 'number') {
-    console.log(msg.severityType);
     updateSeverityTypes(msg.severity, msg.severityType);
     sendResponse({ updated: true });
   } else if (typeof msg.severity === 'number') {
-    console.log('Got the severity number!');
-    console.log(msg.severity);
     updateSeverities(msg.severity);
     sendResponse({ updated: true });
   }
@@ -202,4 +280,15 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     updateHSVs(msg.hueValue, msg.saturationValue, msg.valueValue);
     sendResponse({ updated: true });
   }
+
+  if (typeof msg.redBoost === 'number' && typeof msg.greenBoost === 'number' && typeof msg.blueBoost === 'number') {
+    updateRGBs(msg.redBoost, msg.greenBoost, msg.blueBoost);
+    sendResponse({ updated: true });
+  }
+
+  // if (typeof msg.x === 'number' && typeof msg.y === 'number' && typeof msg.width === 'number' && typeof msg.height === 'number') {
+  //   console.log("Updating position and size");
+  //   updatePositionAndSize(msg.x, msg.y, msg.width, msg.height);
+  //   sendResponse({ updated: true });
+  // }
 });

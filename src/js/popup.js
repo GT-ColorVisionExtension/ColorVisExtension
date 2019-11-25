@@ -1,5 +1,5 @@
 import "../css/options.css";
-import { getSavedSettings } from './storage';
+import { getSavedSettings, saveSettings } from './storage';
 import { generateSeverityMatrix, generateHSVMatrix} from './filterWindow';
 import ANOMALY from "./anomalyDefaults";
 
@@ -232,12 +232,54 @@ function updateHueSaturationValue(h, s, v) {
   });
 }
 
+const redSlider = document.getElementById("red-slider");
+const redText = document.getElementById("red-value");
+const greenSlider = document.getElementById("green-slider");
+const greenText = document.getElementById("green-value");
+const blueSlider = document.getElementById("blue-slider");
+const blueText = document.getElementById("blue-value");
+redSlider.oninput = updateRGB;
+greenSlider.oninput = updateRGB;
+blueSlider.oninput = updateRGB;
+
+function updateRGB(e, r, g, b) {
+  return new Promise((resolve, reject) => {
+    let red, green, blue;
+
+    if (r !== undefined && g !== undefined && b !== undefined) {
+      red = r;
+      green = g;
+      blue = b;
+      redSlider.value = red.toString();
+      greenSlider.value = green.toString();
+      blueSlider.value = blue.toString();
+    } else {
+      red = parseInt(redSlider.value, 10);
+      green = parseInt(greenSlider.value, 10);
+      blue = parseInt(blueSlider.value, 10);
+    }
+
+    redText.innerText = red + "%";
+    greenText.innerText = green + "%";
+    blueText.innerText = blue + "%";
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        redBoost: red,
+        greenBoost: green,
+        blueBoost: blue,
+      }, () => {
+        // updateThumbnailRGB();
+        resolve();
+      });
+    });
+  });
+}
+
 const anomalies = ['NONE', 'PROTANOMALIES', 'DEUTERANOMALIES', 'TRITANOMALIES'];
 const rad = document['cvd-types']['vision-type'];
 for (let i = 0; i < rad.length; i++) {
   rad[i].addEventListener('change', function() {
-    console.log('Updating severity type!?');
-    console.log(anomalies[i]);
     updateSeverityType(anomalies[i]);
   })
 }
@@ -273,6 +315,16 @@ function updateSeverityType(type) {
   })
 }
 
+function updatePositionAndSize(x, y, width, height) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { x: x, y: y, width: width, height: height }, () => {
+        resolve();
+      })
+    })
+  })
+}
+
 /* Slider Reset Buttons */
 const btnResetSev = document.getElementById("reset-severity");
 btnResetSev.onclick = () => updateSeverity(null, 0);
@@ -282,6 +334,12 @@ const btnResetSat = document.getElementById("reset-sat");
 btnResetSat.onclick = () => updateSaturation(null, 100);
 const btnResetVal = document.getElementById("reset-val");
 btnResetVal.onclick = () => updateValue(null, 100);
+const btnResetRed = document.getElementById("reset-red");
+btnResetRed.onclick = () => updateRGB(null, 0, parseInt(greenSlider.value, 10), parseInt(blueSlider.value, 10));
+const btnResetGreen = document.getElementById("reset-green");
+btnResetGreen.onclick = () => updateRGB(null, parseInt(redSlider.value, 10), 0, parseInt(blueSlider.value, 10));
+const btnResetBlue = document.getElementById("reset-blue");
+btnResetBlue.onclick = () => updateRGB(null, parseInt(redSlider.value, 10), parseInt(greenSlider.value, 10), 0);
 
 // Run script when extension pop-up is opened.
 chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -304,7 +362,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
 // Enable/disable window when extension is clicked.
 const toggleButton = document.getElementById("enable-disable");
 toggleButton.onclick = async function(element) {
-  console.log('Button clicked');
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     // Request the current toggle status
     chrome.tabs.sendMessage(tabs[0].id, { currentStatus: 'currentStatus?' }, msg => {
@@ -332,8 +389,11 @@ toggleFullScreen.onclick = function() {
 }
 
 function disableExtension(tabs) {
-  chrome.tabs.sendMessage(tabs[0].id, { disable: 'disable' }, msg => {
+  chrome.tabs.sendMessage(tabs[0].id, { disable: 'disable' }, async msg => {
     toggleButton.innerText = 'Enable';
+    const settings = await getSavedSettings();
+    settings.enabled = false;
+    saveSettings(...settings);
   });
 
   toggleFullScreen.style.display = 'none';
@@ -342,20 +402,23 @@ function disableExtension(tabs) {
 function enableExtension(tabs) {
   chrome.tabs.sendMessage(tabs[0].id, { enable: 'enable' }, async (msg) => {
     const settings = await getSavedSettings();
-    console.log(settings);
     // Have to use setTimeout to increase the chances that the browser will
     // recognize and paint the changes we're making to the DOM
-    updateSeverity(null, settings['severity'] * 100).then(() => {
+    updateSeverity(null, Math.max(settings['severity'] * 100, 100)).then(() => {
       setTimeout(() => {
         updateSeverityType(settings['anomaly']).then(() => {
           setTimeout(() => {
             updateHueSaturationValue(settings['hue'], settings['saturation'], settings['value']).then(() => {
-              toggleButton.innerText = 'Disable';
-              toggleFullScreen.style.display = 'inline';
+              setTimeout(() => {
+                updateRGB(null, settings['redBoost'], settings['greenBoost'], settings['blueBoost']).then(() => {
+                  toggleButton.innerText = 'Disable';
+                  toggleFullScreen.style.display = 'inline';
+                })
+              }, 60)
             })
           }, 60)
         })
       }, 60)
-    })
+    });
   });
 }

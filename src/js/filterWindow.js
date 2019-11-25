@@ -1,179 +1,214 @@
 import ANOMALY from "./anomalyDefaults";
-import { saveSettings } from "./storage";
+import { getSavedSettings, saveSettings } from "./storage";
 
 class FilterWindow {
   /**
    * @param {HTMLElement} target
    */
   constructor(target) {
-    // General settings
-    this.target = target;
-    this.defaultWidth = 400;
-    this.defaultHeight = 300;
-    this.cornerSize = 20;
-    this.lineThickness = 3;
-    this.x = 50;
-    this.y = 50;
-    this.severityType = ANOMALY.NONE;
-    this.anomaly = 'NONE';
-    this.severity = 1;
-    this.hue = 0;
-    this.saturation = 100;
-    this.value = 100;
+    this.getSettings().then(settings => {
+      // General settings
+      this.target = target;
+      this.defaultWidth = settings.width;
+      this.defaultHeight = settings.height;
+      this.width = this.defaultWidth;
+      this.height = this.defaultHeight;
+      this.cornerSize = 20;
+      this.lineThickness = 3;
+      this.x = settings.x;
+      this.y = settings.y;
+      this.severityType = ANOMALY.NONE;
+      this.anomaly = 'NONE';
+      this.severity = 1;
+      this.hue = 0;
+      this.saturation = 100;
+      this.value = 100;
+      this.redBoost = 0;
+      this.greenBoost = 0;
+      this.blueBoost = 0;
+      this.fullscreen = false;
+  
+      // Create an SVG Element
+      const NS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttributeNS(null, "width", "0");
+      svg.setAttributeNS(null, "height", "0");
+  
+      // Create filters
+      const filter_0 = document.createElementNS(NS, "filter");
+      filter_0.setAttributeNS(null, "id", "cvd_0");
+      const matrix_0 = document.createElementNS(NS, "feColorMatrix");
+      matrix_0.setAttributeNS(null, "in", "hsv");
+      matrix_0.setAttributeNS(null, "type", "matrix");
+      matrix_0.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      const matrix_0_hsv = document.createElementNS(NS, "feColorMatrix");
+      matrix_0_hsv.setAttributeNS(null, "in", "rgb");
+      matrix_0_hsv.setAttributeNS(null, "type", "matrix");
+      matrix_0_hsv.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      matrix_0_hsv.setAttributeNS(null, "result", "hsv");
+      const matrix_0_rgb = document.createElementNS(NS, "feColorMatrix");
+      matrix_0_rgb.setAttributeNS(null, "in", "SourceGraphic")
+      matrix_0_rgb.setAttributeNS(null, "type", "matrix");
+      matrix_0_rgb.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      matrix_0_rgb.setAttributeNS(null, "result", "rgb");
+  
+      const filter_1 = document.createElementNS(NS, "filter");
+      filter_1.setAttributeNS(null, "id", "cvd_1");
+      const matrix_1 = document.createElementNS(NS, "feColorMatrix");
+      matrix_1.setAttributeNS(null, "in", "hsv");
+      matrix_1.setAttributeNS(null, "type", "matrix");
+      matrix_1.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      const matrix_1_hsv = document.createElementNS(NS, "feColorMatrix");
+      matrix_1_hsv.setAttributeNS(null, "in", "rgb");
+      matrix_1_hsv.setAttributeNS(null, "type", "matrix");
+      matrix_1_hsv.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      matrix_1_hsv.setAttributeNS(null, "result", "hsv");
+      const matrix_1_rgb = document.createElementNS(NS, "feColorMatrix");
+      matrix_1_rgb.setAttributeNS(null, "in", "SourceGraphic")
+      matrix_1_rgb.setAttributeNS(null, "type", "matrix");
+      matrix_1_rgb.setAttributeNS(
+        null,
+        "values",
+        "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+      );
+      matrix_1_rgb.setAttributeNS(null, "result", "rgb");
+  
+      filter_0.appendChild(matrix_0_rgb);
+      filter_0.appendChild(matrix_0_hsv);
+      filter_0.appendChild(matrix_0);
+      filter_1.appendChild(matrix_1_rgb);
+      filter_1.appendChild(matrix_1_hsv);
+      filter_1.appendChild(matrix_1);
+      svg.appendChild(filter_0);
+      svg.appendChild(filter_1);
+      document.body.appendChild(svg);
+  
+      this.svg = svg;
+      this.filter_0 = filter_0;
+      this.matrix_0 = matrix_0;
+      this.matrix_0_hsv = matrix_0_hsv;
+      this.matrix_0_rgb = matrix_0_rgb;
+      this.filter_1 = filter_1;
+      this.matrix_1 = matrix_1;
+      this.matrix_1_hsv = matrix_1_hsv;
+      this.matrix_1_rgb = matrix_1_rgb;
+      this.currentMatrix = 0;
+  
+      // Set objects
+      this.ccInner = document.createElement("div");
+      // this.ccInner.innerHTML = svgContent;
+      this.target.appendChild(this.ccInner);
+      this.ccInner.style.position = "fixed";
+      this.ccInner.style.width = `${this.defaultWidth}px`;
+      this.ccInner.style.height = `${this.defaultHeight}px`;
+      this.ccInner.style.left = `${this.x}px`;
+      this.ccInner.style.top = `${this.y}px`;
+      this.ccInner.style.zIndex = "99999999";
+      this.ccInner.style["backdrop-filter"] = "url('#cvd_0')";
+      this.ccInner.style["pointer-events"] = "none";
+      this.ccInner.style.transformOrigin = "top left";
+  
+      // TopLeft Corner
+      this.ccTopLeft = document.createElement("div");
+      this.target.appendChild(this.ccTopLeft);
+      this.ccTopLeft.setAttribute("class", "ccTopLeft");
+      this.ccTopLeft.style.position = "fixed";
+      this.ccTopLeft.style.width = `${this.cornerSize}px`;
+      this.ccTopLeft.style.height = `${this.cornerSize}px`;
+      // this.ccTopLeft.style.borderLeft = `${this.lineThickness}px solid red`;
+      // this.ccTopLeft.style.borderTop = `${this.lineThickness}px solid red`;
+      this.ccTopLeft.style.boxSizing = "border-box";
+      this.ccTopLeft.style.left = `${this.x}px`;
+      this.ccTopLeft.style.top = `${this.y}px`;
+      this.ccTopLeft.style.zIndex = "99999999";
+      this.ccTopLeft.style.backgroundColor = "rgba(0, 0, 0, 0)";
+      this.ccTopLeft.style.transformOrigin = "top left";
+  
+      // TopRight Corner
+      this.ccTopRight = document.createElement("div");
+      this.target.appendChild(this.ccTopRight);
+      this.ccTopRight.setAttribute("class", "ccTopRight");
+      this.ccTopRight.style.position = "fixed";
+      this.ccTopRight.style.width = `${this.cornerSize}px`;
+      this.ccTopRight.style.height = `${this.cornerSize}px`;
+      // this.ccTopRight.style.borderRight = `${this.lineThickness}px solid red`;
+      // this.ccTopRight.style.borderTop = `${this.lineThickness}px solid red`;
+      this.ccTopRight.style.boxSizing = "border-box";
+      this.ccTopRight.style.left = `${this.x +
+        this.defaultWidth -
+        this.cornerSize}px`;
+      this.ccTopRight.style.top = `${this.y}px`;
+      this.ccTopRight.style.zIndex = "99999999";
+      this.ccTopRight.style.backgroundColor = "rgba(0, 0, 0, 0)";
+      this.ccTopRight.style.transformOrigin = "top right";
+  
+      this.ccBottomLeft = document.createElement("div");
+      this.target.appendChild(this.ccBottomLeft);
+      this.ccBottomLeft.setAttribute("class", "ccBottomLeft");
+      this.ccBottomLeft.style.position = "fixed";
+      this.ccBottomLeft.style.width = `${this.cornerSize}px`;
+      this.ccBottomLeft.style.height = `${this.cornerSize}px`;
+      // this.ccBottomLeft.style.borderLeft = `${this.lineThickness}px solid red`;
+      // this.ccBottomLeft.style.borderBottom = `${this.lineThickness}px solid red`;
+      this.ccBottomLeft.style.boxSizing = "border-box";
+      this.ccBottomLeft.style.left = `${this.x}px`;
+      this.ccBottomLeft.style.top = `${this.y +
+        this.defaultHeight -
+        this.cornerSize}px`;
+      this.ccBottomLeft.style.zIndex = "99999999";
+      this.ccBottomLeft.style.backgroundColor = "rgba(0, 0, 0, 0)";
+      this.ccBottomLeft.style.transformOrigin = "bottom left";
+  
+      this.ccBottomRight = document.createElement("div");
+      this.target.appendChild(this.ccBottomRight);
+      this.ccBottomRight.setAttribute("class", "ccBottomRight");
+      this.ccBottomRight.style.position = "fixed";
+      this.ccBottomRight.style.width = `${this.cornerSize}px`;
+      this.ccBottomRight.style.height = `${this.cornerSize}px`;
+      // this.ccBottomRight.style.borderRight = `${this.lineThickness}px solid red`;
+      // this.ccBottomRight.style.borderBottom = `${this.lineThickness}px solid red`;
+      this.ccBottomRight.style.boxSizing = "border-box";
+      this.ccBottomRight.style.left = `${this.x +
+        this.defaultWidth -
+        this.cornerSize}px`;
+      this.ccBottomRight.style.top = `${this.y +
+        this.defaultHeight -
+        this.cornerSize}px`;
+      this.ccBottomRight.style.zIndex = "99999999";
+      this.ccBottomRight.style.backgroundColor = "rgba(0, 0, 0, 0)";
+      this.ccBottomRight.style.transformOrigin = "bottom right";
+  
+      // Enable drag
+      this.enableDrag(this.ccTopLeft, "TopLeft");
+      this.enableDrag(this.ccTopRight, "TopRight");
+      this.enableDrag(this.ccBottomLeft, "BottomLeft");
+      this.enableDrag(this.ccBottomRight, "BottomRight");
+    })
+    
+  }
 
-    // Create an SVG Element
-    const NS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttributeNS(null, "width", "0");
-    svg.setAttributeNS(null, "height", "0");
-
-    // Create filters
-    const filter_0 = document.createElementNS(NS, "filter");
-    filter_0.setAttributeNS(null, "id", "cvd_0");
-    const matrix_0 = document.createElementNS(NS, "feColorMatrix");
-    matrix_0.setAttributeNS(null, "in", "hsv");
-    matrix_0.setAttributeNS(null, "type", "matrix");
-    matrix_0.setAttributeNS(
-      null,
-      "values",
-      "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
-    );
-    const matrix_0_hsv = document.createElementNS(NS, "feColorMatrix");
-    matrix_0_hsv.setAttributeNS(null, "in", "SourceGraphic");
-    matrix_0_hsv.setAttributeNS(null, "type", "matrix");
-    matrix_0_hsv.setAttributeNS(
-      null,
-      "values",
-      "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
-    );
-    matrix_0_hsv.setAttributeNS(null, "result", "hsv");
-
-    const filter_1 = document.createElementNS(NS, "filter");
-    filter_1.setAttributeNS(null, "id", "cvd_1");
-    const matrix_1 = document.createElementNS(NS, "feColorMatrix");
-    matrix_1.setAttributeNS(null, "in", "hsv");
-    matrix_1.setAttributeNS(null, "type", "matrix");
-    matrix_1.setAttributeNS(
-      null,
-      "values",
-      "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
-    );
-    const matrix_1_hsv = document.createElementNS(NS, "feColorMatrix");
-    matrix_1_hsv.setAttributeNS(null, "in", "SourceGraphic");
-    matrix_1_hsv.setAttributeNS(null, "type", "matrix");
-    matrix_1_hsv.setAttributeNS(
-      null,
-      "values",
-      "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
-    );
-    matrix_1_hsv.setAttributeNS(null, "result", "hsv");
-
-    filter_0.appendChild(matrix_0_hsv);
-    filter_0.appendChild(matrix_0);
-    filter_1.appendChild(matrix_1_hsv);
-    filter_1.appendChild(matrix_1);
-    svg.appendChild(filter_0);
-    svg.appendChild(filter_1);
-    document.body.appendChild(svg);
-
-    this.svg = svg;
-    this.filter_0 = filter_0;
-    this.matrix_0 = matrix_0;
-    this.matrix_0_hsv = matrix_0_hsv;
-    this.filter_1 = filter_1;
-    this.matrix_1 = matrix_1;
-    this.matrix_1_hsv = matrix_1_hsv;
-    this.currentMatrix = 0;
-
-    // Set objects
-    this.ccInner = document.createElement("div");
-    // this.ccInner.innerHTML = svgContent;
-    this.target.appendChild(this.ccInner);
-    this.ccInner.style.position = "fixed";
-    this.ccInner.style.width = `${this.defaultWidth}px`;
-    this.ccInner.style.height = `${this.defaultHeight}px`;
-    this.ccInner.style.left = `${this.x}px`;
-    this.ccInner.style.top = `${this.y}px`;
-    this.ccInner.style.zIndex = "99999999";
-    this.ccInner.style["backdrop-filter"] = "url('#cvd_0')";
-    this.ccInner.style["pointer-events"] = "none";
-    this.ccInner.style.transformOrigin = "top left";
-
-    // TopLeft Corner
-    this.ccTopLeft = document.createElement("div");
-    this.target.appendChild(this.ccTopLeft);
-    this.ccTopLeft.setAttribute("class", "ccTopLeft");
-    this.ccTopLeft.style.position = "fixed";
-    this.ccTopLeft.style.width = `${this.cornerSize}px`;
-    this.ccTopLeft.style.height = `${this.cornerSize}px`;
-    // this.ccTopLeft.style.borderLeft = `${this.lineThickness}px solid red`;
-    // this.ccTopLeft.style.borderTop = `${this.lineThickness}px solid red`;
-    this.ccTopLeft.style.boxSizing = "border-box";
-    this.ccTopLeft.style.left = `${this.x}px`;
-    this.ccTopLeft.style.top = `${this.y}px`;
-    this.ccTopLeft.style.zIndex = "99999999";
-    this.ccTopLeft.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    this.ccTopLeft.style.transformOrigin = "top left";
-
-    // TopRight Corner
-    this.ccTopRight = document.createElement("div");
-    this.target.appendChild(this.ccTopRight);
-    this.ccTopRight.setAttribute("class", "ccTopRight");
-    this.ccTopRight.style.position = "fixed";
-    this.ccTopRight.style.width = `${this.cornerSize}px`;
-    this.ccTopRight.style.height = `${this.cornerSize}px`;
-    // this.ccTopRight.style.borderRight = `${this.lineThickness}px solid red`;
-    // this.ccTopRight.style.borderTop = `${this.lineThickness}px solid red`;
-    this.ccTopRight.style.boxSizing = "border-box";
-    this.ccTopRight.style.left = `${this.x +
-      this.defaultWidth -
-      this.cornerSize}px`;
-    this.ccTopRight.style.top = `${this.y}px`;
-    this.ccTopRight.style.zIndex = "99999999";
-    this.ccTopRight.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    this.ccTopRight.style.transformOrigin = "top right";
-
-    this.ccBottomLeft = document.createElement("div");
-    this.target.appendChild(this.ccBottomLeft);
-    this.ccBottomLeft.setAttribute("class", "ccBottomLeft");
-    this.ccBottomLeft.style.position = "fixed";
-    this.ccBottomLeft.style.width = `${this.cornerSize}px`;
-    this.ccBottomLeft.style.height = `${this.cornerSize}px`;
-    // this.ccBottomLeft.style.borderLeft = `${this.lineThickness}px solid red`;
-    // this.ccBottomLeft.style.borderBottom = `${this.lineThickness}px solid red`;
-    this.ccBottomLeft.style.boxSizing = "border-box";
-    this.ccBottomLeft.style.left = `${this.x}px`;
-    this.ccBottomLeft.style.top = `${this.y +
-      this.defaultHeight -
-      this.cornerSize}px`;
-    this.ccBottomLeft.style.zIndex = "99999999";
-    this.ccBottomLeft.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    this.ccBottomLeft.style.transformOrigin = "bottom left";
-
-    this.ccBottomRight = document.createElement("div");
-    this.target.appendChild(this.ccBottomRight);
-    this.ccBottomRight.setAttribute("class", "ccBottomRight");
-    this.ccBottomRight.style.position = "fixed";
-    this.ccBottomRight.style.width = `${this.cornerSize}px`;
-    this.ccBottomRight.style.height = `${this.cornerSize}px`;
-    // this.ccBottomRight.style.borderRight = `${this.lineThickness}px solid red`;
-    // this.ccBottomRight.style.borderBottom = `${this.lineThickness}px solid red`;
-    this.ccBottomRight.style.boxSizing = "border-box";
-    this.ccBottomRight.style.left = `${this.x +
-      this.defaultWidth -
-      this.cornerSize}px`;
-    this.ccBottomRight.style.top = `${this.y +
-      this.defaultHeight -
-      this.cornerSize}px`;
-    this.ccBottomRight.style.zIndex = "99999999";
-    this.ccBottomRight.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    this.ccBottomRight.style.transformOrigin = "bottom right";
-
-    // Enable drag
-    this.enableDrag(this.ccTopLeft, "TopLeft");
-    this.enableDrag(this.ccTopRight, "TopRight");
-    this.enableDrag(this.ccBottomLeft, "BottomLeft");
-    this.enableDrag(this.ccBottomRight, "BottomRight");
+  async getSettings() {
+    return await getSavedSettings();
   }
 
   /**
@@ -233,6 +268,13 @@ class FilterWindow {
       self.ccInner.style.left = `${self.ccTopLeft.offsetLeft}px`;
       self.ccInner.style.top = `${self.ccTopLeft.offsetTop}px`;
 
+      // Also set it in instance variable
+      self.width = width;
+      self.height = height;
+      self.x = self.ccTopLeft.offsetLeft;
+      self.y = self.ccTopLeft.offsetTop;
+      self.fullscreen = false;
+
       if (
         self.ccTopLeft.offsetLeft <=
           self.ccTopRight.offsetLeft + self.cornerSize &&
@@ -282,11 +324,11 @@ class FilterWindow {
       e.preventDefault(e);
       document.onmouseup = null;
       document.onmousemove = null;
+      self.onUpdate();
     }
   }
 
   updateSeverityFilter(value) {
-    console.log(value);
     const next = 1 - this.currentMatrix;
     const matrixString = generateSeverityMatrix(value, this.severityType);
     this["matrix_" + 0].setAttribute("values", matrixString);
@@ -325,16 +367,12 @@ class FilterWindow {
 
   updateSeverityType(severity, severityType) {
     if (severityType === 'NONE') {
-      console.log('Setting anomaly to none')
       this.severityType = ANOMALY.NONE;
     } else if (severityType === 'PROTANOMALIES') {
-      console.log('Setting anomaly to protanomaly')
       this.severityType = ANOMALY.PROTANOMALIES;
     } else if (severityType === 'DEUTERANOMALIES') {
-      console.log('Deuteranomaly setting')
       this.severityType = ANOMALY.DEUTERANOMALIES;
     } else if (severityType === 'TRITANOMALIES') {
-      console.log('Tritanomaly setting');
       this.severityType = ANOMALY.TRITANOMALIES;
     }
 
@@ -342,8 +380,37 @@ class FilterWindow {
     this.updateSeverityFilter(severity); // this calls onUpdate to save later
   }
 
+  updateRGB(red, green, blue) {
+    /** Parameters are expected to be integers from -300 to 300 */
+    const r = red / 100;
+    const g = green / 100;
+    const b = blue / 100;
+    const next = 1 - this.currentMatrix;
+
+    const matrixString = `
+      1  0  0  0  0
+      ${-r}  1  0  0  0
+      ${-g}  ${-b}  1  0  0
+      0  0  0  1  0
+    `
+
+    this["matrix_" + 0 + "_rgb"].setAttribute("values", matrixString);
+    this["matrix_" + 1 + "_rgb"].setAttribute("values", matrixString);
+    this.ccInner.style["backdrop-filter"] = `url('#cvd_${next}')`;
+    this.currentMatrix = next;
+
+    this.redBoost = red;
+    this.greenBoost = green;
+    this.blueBoost = blue;
+    this.onUpdate();
+  }
+
+  updatePositionAndSize(x, y, width, height) {
+    
+  }
+
   onUpdate() {
-    saveSettings(this.anomaly, this.severity, this.hue, this.saturation, this.value);
+    saveSettings(this.anomaly, this.severity, this.hue, this.saturation, this.value, this.redBoost, this.greenBoost, this.blueBoost, this.x, this.y, this.width, this.height, this.fullscreen, true);
   }
 
   removeFromDOM() {
@@ -418,9 +485,6 @@ function generateSeverityMatrix(severity, visionType) {
   const upper = (Math.ceil(severity * 10) / 10).toFixed(1);
 
   if (lower === upper) {
-    console.log(visionType);
-    console.log(upper);
-    console.log(visionType[upper]);
     return visionType[upper].flat().join(" ");
   }
 

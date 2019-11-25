@@ -12,7 +12,7 @@
     <div class="Header">
       <h1>CHROMATIC</h1>
     </div>
-    <p>STEP 1: Choose a Vision Type (pick the one with the faintest stars)</p>
+    <p>Simulate a CVD Type (for non-CVD users)</p>
 
     <form name="cvd-types">
       <div id="radios" class="radios">
@@ -89,7 +89,7 @@
         </div>
       </div>
     </form>
-    <p>Step 2: Choose the severity of your CVD. Adjust until the stars are more visible.</p>
+    <p>CVD Simulation Severity</p>
 
     <div class="slider">
       <label for="severity-slider">Severity</label>
@@ -102,40 +102,88 @@
         value="100"
       />
       <output id="severity-value" style="display: inline-block; width: 20px;">100%</output>
-      <button id="reset-severity" class="slider-button">Reset</button>
+      <button id="reset-severity" class="slider-button">↺</button>
     </div>
 
-    <p>Step 3: Adjust additional color settings.</p>
+    <p>Color Adjustment. Experiment with the settings to improve contrast between colors.</p>
 
-    <div class="slider">
-      <label for="hue-slider">Hue</label>
-      <input
-        id="hue-slider"
-        name="hue-slider"
-        type="range"
-        min="0"
-        max="360"
-        value="0"
-      />
-      <output id="hue-value" style="display: inline-block; width: 20px;">0°</output>
-      <button id="reset-hue" class="slider-button">Reset</button>
+    <div class="slider tooltip">
+        <span class="tooltiptext">Adjust ratio of red to green.</span>
+        <label for="red-slider">Red:Green</label>
+        <input
+          id="red-slider"
+          name="red-slider"
+          type="range"
+          min="-100"
+          max="100"
+          value="0"
+        />
+        <output id="red-value" style="display: inline-block; width: 20px;">0%</output>
+        <button id="reset-red" class="slider-button">↺</button>
     </div>
 
-    <div class="slider">
-      <label for="saturation-slider">Saturation</label>
-      <input
-        id="saturation-slider"
-        name="saturation-slider"
-        type="range"
-        min="0"
-        max="300"
-        value="100"
-      />
-      <output id="saturation-value" style="display: inline-block; width: 20px;">100%</output>
-      <button id="reset-sat" class="slider-button">Reset</button>
+    <div class="slider tooltip">
+        <span class="tooltiptext">Adjust ratio of red to blue.</span>
+        <label for="green-slider">Red:Blue</label>
+        <input
+          id="green-slider"
+          name="green-slider"
+          type="range"
+          min="-100"
+          max="100"
+          value="0"
+        />
+        <output id="green-value" style="display: inline-block; width: 20px;">0%</output>
+        <button id="reset-green" class="slider-button">↺</button>
     </div>
 
-    <div class="slider">
+    <div class="slider tooltip">
+        <span class="tooltiptext">Adjust ratio of green to blue.</span>
+        <label for="blue-slider">Green:Blue</label>
+        <input
+          id="blue-slider"
+          name="blue-slider"
+          type="range"
+          min="-100"
+          max="100"
+          value="0"
+        />
+        <output id="blue-value" style="display: inline-block; width: 20px;">0%</output>
+        <button id="reset-blue" class="slider-button">↺</button>
+    </div>
+
+    <div class="slider tooltip">
+        <span class="tooltiptext">Apply a hue rotation (0 to 360 degrees)</span>
+        <label for="hue-slider">Hue</label>
+        <input
+          id="hue-slider"
+          name="hue-slider"
+          type="range"
+          min="0"
+          max="360"
+          value="0"
+        />
+        <output id="hue-value" style="display: inline-block; width: 20px;">0°</output>
+        <button id="reset-hue" class="slider-button">↺</button>
+    </div>
+
+    <div class="slider tooltip">
+        <span class="tooltiptext">Adjust saturation (0 to 300%)</span>
+        <label for="saturation-slider">Saturation</label>
+        <input
+          id="saturation-slider"
+          name="saturation-slider"
+          type="range"
+          min="0"
+          max="300"
+          value="100"
+        />
+        <output id="saturation-value" style="display: inline-block; width: 20px;">100%</output>
+        <button id="reset-sat" class="slider-button">↺</button>
+    </div>
+
+    <div class="slider tooltip">
+      <span class="tooltiptext">Adjust lightness (0 to 300%)</span>
       <label for="value-slider">Value</label>
       <input
         id="value-slider"
@@ -146,10 +194,11 @@
         value="100"
       />
       <output id="value-value" style="display: inline-block; width: 20px;">100%</output>
-      <button id="reset-val" class="slider-button">Reset</button>
+      <button id="reset-val" class="slider-button">↺</button>
     </div>
-
-    <button id="enable-disable" class="apply">Disable</button>
-    <button id="cc-full-screen" class="apply">Full Screen</button>
+  
+      <button id="enable-disable" class="apply">Disable</button>
+      <button id="cc-full-screen" class="apply">Full Screen</button>
+      </div>
   </body>
 </html>

@@ -22,7 +22,7 @@ matrix_0.setAttributeNS(
   "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
 );
 const matrix_0_hsv = document.createElementNS(NS, "feColorMatrix");
-matrix_0_hsv.setAttributeNS(null, "in", "SourceGraphic");
+matrix_0_hsv.setAttributeNS(null, "in", "rgb");
 matrix_0_hsv.setAttributeNS(null, "type", "matrix");
 matrix_0_hsv.setAttributeNS(
   null,
@@ -30,6 +30,15 @@ matrix_0_hsv.setAttributeNS(
   "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
 );
 matrix_0_hsv.setAttributeNS(null, "result", "hsv");
+const matrix_0_rgb = document.createElementNS(NS, "feColorMatrix");
+matrix_0_rgb.setAttributeNS(null, "in", "SourceGraphic")
+matrix_0_rgb.setAttributeNS(null, "type", "matrix");
+matrix_0_rgb.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+matrix_0_rgb.setAttributeNS(null, "result", "rgb");
 
 const filter_1 = document.createElementNS(NS, "filter");
 filter_1.setAttributeNS(null, "id", "cvd_1");
@@ -42,7 +51,7 @@ matrix_1.setAttributeNS(
   "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
 );
 const matrix_1_hsv = document.createElementNS(NS, "feColorMatrix");
-matrix_1_hsv.setAttributeNS(null, "in", "SourceGraphic");
+matrix_1_hsv.setAttributeNS(null, "in", "rgb");
 matrix_1_hsv.setAttributeNS(null, "type", "matrix");
 matrix_1_hsv.setAttributeNS(
   null,
@@ -50,9 +59,20 @@ matrix_1_hsv.setAttributeNS(
   "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
 );
 matrix_1_hsv.setAttributeNS(null, "result", "hsv");
+const matrix_1_rgb = document.createElementNS(NS, "feColorMatrix");
+matrix_1_rgb.setAttributeNS(null, "in", "SourceGraphic")
+matrix_1_rgb.setAttributeNS(null, "type", "matrix");
+matrix_1_rgb.setAttributeNS(
+  null,
+  "values",
+  "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"
+);
+matrix_1_rgb.setAttributeNS(null, "result", "rgb");
 
+filter_0.appendChild(matrix_0_rgb)
 filter_0.appendChild(matrix_0_hsv);
 filter_0.appendChild(matrix_0);
+filter_1.appendChild(matrix_1_rgb);
 filter_1.appendChild(matrix_1_hsv);
 filter_1.appendChild(matrix_1);
 svg.appendChild(filter_0);
@@ -102,6 +122,25 @@ function updateThumbnailHSV(hue, sat, val) {
 
   matrix_0_hsv.setAttribute("values", matrixString);
   matrix_1_hsv.setAttribute("values", matrixString);
+  radios.style.filter = `url('#cvd_${next}')`;
+  currentMatrix = next;
+}
+
+function updateThumbnailRGB(red, green, blue) {
+  const r = red / 100;
+  const g = green / 100;
+  const b = blue / 100;
+  const next = 1 - currentMatrix;
+
+  const matrixString = `
+    1  0  0  0  0
+    ${-r}  1  0  0  0
+    ${-g}  ${-b}  1  0  0
+    0  0  0  1  0
+  `
+
+  matrix_0_rgb.setAttribute("values", matrixString);
+  matrix_1_rgb.setAttribute("values", matrixString);
   radios.style.filter = `url('#cvd_${next}')`;
   currentMatrix = next;
 }
@@ -263,13 +302,14 @@ function updateRGB(e, r, g, b) {
     greenText.innerText = green + "%";
     blueText.innerText = blue + "%";
 
+    updateThumbnailRGB(red, green, blue);
+
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {
         redBoost: red,
         greenBoost: green,
         blueBoost: blue,
       }, () => {
-        // updateThumbnailRGB();
         resolve();
       });
     });
